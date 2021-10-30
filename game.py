@@ -18,12 +18,23 @@ LENGTH = 1
 
 def draw():
 	y = 0
+	pitch = {
+		f'[0, 0]': '╔',
+		f'[0, {HEIGHT - 1}]': '╚',
+		f'[{WIDTH - 1}, 0]': '╗',
+		f'[{WIDTH - 1}, {HEIGHT - 1}]': '╝',
+	}
 	while y < HEIGHT:
 		x = 0
 		result = ''
 		while x < WIDTH:
-			if y == 0 or y == HEIGHT - 1 or x == 0 or x == WIDTH - 1:
-				result += 'o'
+			if y == 0 or y == HEIGHT - 1:
+				try:
+					result += pitch[str([x, y])]
+				except KeyError:
+					result += '═'
+			elif x == 0 or x == WIDTH - 1:
+				result += '║'
 			elif x == round(ballX) and y == round(ballY):
 				result += 'o'
 			elif player1_y <= y <= player1_y + LENGTH and x == player1_x:
@@ -80,3 +91,4 @@ while True:
 	os.system('cls')
 	draw()
 	time.sleep(0.01)
+
