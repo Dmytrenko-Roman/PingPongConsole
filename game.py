@@ -2,6 +2,7 @@ from pynput import keyboard
 import time
 import os
 
+
 def draw(w, h, l, p1x, p1y, p2x, p2y, bx, by):
 	y = 0
 	pitch = {
@@ -33,11 +34,14 @@ def draw(w, h, l, p1x, p1y, p2x, p2y, bx, by):
 		print(result)
 		y += 1
 
+
 WIDTH = 40
 HEIGHT = 10
 LENGTH = 1
+BORDER = LENGTH + 2
 BALL_DIR_X = 0.2
 BALL_DIR_Y = 0.2
+DIFFICULTY = 0.01
 
 ballX = WIDTH / 2
 ballY = HEIGHT / 2
@@ -50,47 +54,59 @@ player2_y = HEIGHT / 2
 player1_x = 1
 player2_x = WIDTH - 2
 
+
 def press_instruction(key):
-	global player1_y, player2_y
-	if key == keyboard.KeyCode.from_char('w'):
-		if player1_y > 1:
-			player1_y -= 1
-	elif key == keyboard.KeyCode.from_char('s'):
-		if player1_y < HEIGHT - 3:
-			player1_y += 1
-	if key == keyboard.Key.up:
-		if player2_y > 1:
-			player2_y -= 1
-	elif key == keyboard.Key.down:
-		if player2_y < HEIGHT - 3:
-			player2_y += 1	
+	global player1_y, player2_y, BORDER
+	keys = [
+		[player1_y, keyboard.KeyCode.from_char('w'), keyboard.KeyCode.from_char('s')],
+		[player2_y, keyboard.Key.up, keyboard.Key.down],
+	]
+
+	for k in keys:
+		if key == k[1]:
+			if k[0] > 1:
+				k[0] -= 1
+		elif key == k[2]:
+			if k[0] < HEIGHT - BORDER:
+				k[0] += 1
+
+	player1_y = keys[0][0]
+	player2_y = keys[1][0]
+
 
 def release_instruction(key):
 	pass
+
 
 keyboard.Listener(
 	on_press=press_instruction,
 	on_release=release_instruction
 ).start()
 
+
 while True:
 	ballX += BALL_DIR_X * directionX
 	ballY += BALL_DIR_Y * directionY
+
 	if round(ballX) == WIDTH - 1:
 		print('Left gamer wins!')
 		break
 	if round(ballX) == 0:
 		print('Right gamer wins!')
 		break
-	if player1_y <= round(ballY) <= player1_y + LENGTH and round(ballX) == player1_x:
+
+	LEFT_BORDER = player1_y <= round(ballY) <= player1_y + LENGTH
+	RIGHT_BORDER = player2_y <= round(ballY) <= player2_y + LENGTH
+	
+	if LEFT_BORDER and round(ballX) == player1_x:
 		directionX = 1
-	if player2_y <= round(ballY) <= player2_y + LENGTH and round(ballX) == player2_x:
+	if RIGHT_BORDER and round(ballX) == player2_x:
 		directionX = -1
 	if round(ballY) == 0:
 		directionY = 1
 	if round(ballY) == HEIGHT - 1:
 		directionY = -1
+	
 	os.system('cls')
 	draw(WIDTH, HEIGHT, LENGTH, player1_x, player1_y, player2_x, player2_y, ballX, ballY)
-	time.sleep(0.01)
-
+	time.sleep(DIFFICULTY)
