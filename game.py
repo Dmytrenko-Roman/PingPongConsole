@@ -2,44 +2,30 @@ from pynput import keyboard
 import time
 import os
 
-WIDTH = 40
-HEIGHT = 10
-ballX = WIDTH / 2
-ballY = HEIGHT / 2
-BALL_DIR_X = 0.2
-BALL_DIR_Y = 0.2
-directionX = 1
-directionY = 1
-player1_y = HEIGHT / 2
-player2_y = HEIGHT / 2
-player1_x = 1
-player2_x = WIDTH - 2
-LENGTH = 1
-
-def draw():
+def draw(w, h, l, p1x, p1y, p2x, p2y, bx, by):
 	y = 0
 	pitch = {
 		f'[0, 0]': '╔',
-		f'[0, {HEIGHT - 1}]': '╚',
-		f'[{WIDTH - 1}, 0]': '╗',
-		f'[{WIDTH - 1}, {HEIGHT - 1}]': '╝',
+		f'[0, {h - 1}]': '╚',
+		f'[{w - 1}, 0]': '╗',
+		f'[{w - 1}, {h - 1}]': '╝',
 	}
-	while y < HEIGHT:
+	while y < h:
 		x = 0
 		result = ''
-		while x < WIDTH:
-			if y == 0 or y == HEIGHT - 1:
+		while x < w:
+			if y == 0 or y == h - 1:
 				try:
 					result += pitch[str([x, y])]
 				except KeyError:
 					result += '═'
-			elif x == 0 or x == WIDTH - 1:
+			elif x == 0 or x == w - 1:
 				result += '║'
-			elif x == round(ballX) and y == round(ballY):
+			elif x == round(bx) and y == round(by):
 				result += 'o'
-			elif player1_y <= y <= player1_y + LENGTH and x == player1_x:
+			elif p1y <= y <= p1y + l and x == p1x:
 				result += '|'
-			elif player2_y <= y <= player2_y + LENGTH and x == player2_x:
+			elif p2y <= y <= p2y + l and x == p2x:
 				result += '|'
 			else:
 				result += ' '
@@ -47,6 +33,22 @@ def draw():
 		print(result)
 		y += 1
 
+WIDTH = 40
+HEIGHT = 10
+LENGTH = 1
+BALL_DIR_X = 0.2
+BALL_DIR_Y = 0.2
+
+ballX = WIDTH / 2
+ballY = HEIGHT / 2
+
+directionX = 1
+directionY = 1
+
+player1_y = HEIGHT / 2
+player2_y = HEIGHT / 2
+player1_x = 1
+player2_x = WIDTH - 2
 
 def press_instruction(key):
 	global player1_y, player2_y
@@ -89,6 +91,6 @@ while True:
 	if round(ballY) == HEIGHT - 1:
 		directionY = -1
 	os.system('cls')
-	draw()
+	draw(WIDTH, HEIGHT, LENGTH, player1_x, player1_y, player2_x, player2_y, ballX, ballY)
 	time.sleep(0.01)
 
