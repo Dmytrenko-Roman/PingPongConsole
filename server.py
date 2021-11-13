@@ -1,6 +1,39 @@
 from pynput import keyboard
 import time
 import os
+import socket
+import sys
+import threading
+
+
+HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
+PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.bind((HOST, PORT))
+s.listen()
+conn, addr = s.accept()
+
+
+encoding = sys.getdefaultencoding()
+thread = None
+client_key = None
+
+def thread_function():
+	global conn, client_key, player2_y
+	while True:
+		data = conn.recv(1024)
+		client_key = int(data.decode(encoding))
+		if client_key == 1:
+			if player2_y > 1:
+				player2_y -= 1
+		elif client_key == 2:
+			if player2_y < HEIGHT - BORDER:
+				player2_y += 1
+
+
+thread = threading.Thread(target=thread_function)
+thread.start()
 
 
 def draw(w, h, l, p1x, p1y, p2x, p2y, bx, by):
@@ -11,9 +44,11 @@ def draw(w, h, l, p1x, p1y, p2x, p2y, bx, by):
 		f'[{w - 1}, 0]': '╗',
 		f'[{w - 1}, {h - 1}]': '╝',
 	}
+
 	while y < h:
 		x = 0
 		result = ''
+		
 		while x < w:
 			if y == 0 or y == h - 1:
 				try:
@@ -31,6 +66,7 @@ def draw(w, h, l, p1x, p1y, p2x, p2y, bx, by):
 			else:
 				result += ' '
 			x += 1
+
 		print(result)
 		y += 1
 
@@ -57,21 +93,13 @@ player2_x = WIDTH - 2
 
 def press_instruction(key):
 	global player1_y, player2_y, BORDER
-	keys = [
-		[player1_y, keyboard.KeyCode.from_char('w'), keyboard.KeyCode.from_char('s')],
-		[player2_y, keyboard.Key.up, keyboard.Key.down],
-	]
 
-	for k in keys:
-		if key == k[1]:
-			if k[0] > 1:
-				k[0] -= 1
-		elif key == k[2]:
-			if k[0] < HEIGHT - BORDER:
-				k[0] += 1
-
-	player1_y = keys[0][0]
-	player2_y = keys[1][0]
+	if key == keyboard.KeyCode.from_char('w'):
+		if player1_y > 1:
+			player1_y -= 1
+	elif key == keyboard.KeyCode.from_char('s'):
+		if player1_y < HEIGHT - BORDER:
+			player1_y += 1
 
 
 def release_instruction(key):
@@ -85,6 +113,7 @@ keyboard.Listener(
 
 
 while True:
+
 	ballX += BALL_DIR_X * directionX
 	ballY += BALL_DIR_Y * directionY
 
@@ -106,7 +135,9 @@ while True:
 		directionY = 1
 	if round(ballY) == HEIGHT - 1:
 		directionY = -1
-	
+
+	conn.send(str.encode(f'{int(round(ballX))},{int(round(ballY))},{int(player1_y)}, {int(player2_y)}'))
+
 	os.system('cls')
 	draw(WIDTH, HEIGHT, LENGTH, player1_x, player1_y, player2_x, player2_y, ballX, ballY)
 	time.sleep(DIFFICULTY)
