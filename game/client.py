@@ -5,9 +5,8 @@ import socket
 import sys
 
 
-HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
-PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
-		
+HOST = '127.0.0.1'
+PORT = 65432
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
 
@@ -16,7 +15,7 @@ encoding = sys.getdefaultencoding()
 CLIENT_KEY = None
 
 
-def draw(w, h, l, p1x, p1y, p2x, p2y, bx, by):
+def draw(w, h, l, p1x, p2x, p1y, p2y, bx, by):
 	y = 0
 	pitch = {
 		f'[0, 0]': '╔',
@@ -54,19 +53,8 @@ def draw(w, h, l, p1x, p1y, p2x, p2y, bx, by):
 WIDTH = 40
 HEIGHT = 10
 LENGTH = 1
-BORDER = LENGTH + 2
-BALL_DIR_X = 1
-BALL_DIR_Y = 1
 DIFFICULTY = 0.01
 
-ballX = WIDTH / 2
-ballY = HEIGHT / 2
-
-directionX = 1
-directionY = 1
-
-player1_y = HEIGHT / 2
-player2_y = HEIGHT / 2
 player1_x = 1
 player2_x = WIDTH - 2
 
@@ -93,8 +81,18 @@ keyboard.Listener(
 
 while True:
 	data = s.recv(1024)
-	res = data.decode(encoding)
-	res = res.split(',')
+	coords_str = data.decode(encoding)
+	coords_str = coords_str.split(',')
+
+	coords = list(map(lambda i: int(i), coords_str))
+
+	if round(coords[2]) == WIDTH - 1:
+		print('Left gamer wins!')
+		break
+	if round(coords[2]) == 0:
+		print('Right gamer wins!')
+		break
+
 	os.system('cls')
-	draw(WIDTH, HEIGHT, LENGTH, player1_x, int(res[2]), player2_x, int(res[3]), int(res[0]), int(res[1]))
+	draw(WIDTH, HEIGHT, LENGTH, player1_x, player2_x, coords[0], coords[1], coords[2], coords[3])
 	time.sleep(DIFFICULTY)

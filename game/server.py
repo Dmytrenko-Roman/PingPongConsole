@@ -6,9 +6,8 @@ import sys
 import threading
 
 
-HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
-PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
-
+HOST = '127.0.0.1'
+PORT = 65432
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((HOST, PORT))
 s.listen()
@@ -18,6 +17,7 @@ conn, addr = s.accept()
 encoding = sys.getdefaultencoding()
 thread = None
 client_key = None
+
 
 def thread_function():
 	global conn, client_key, player2_y
@@ -79,12 +79,11 @@ BALL_DIR_X = 0.2
 BALL_DIR_Y = 0.2
 DIFFICULTY = 0.01
 
+
 ballX = WIDTH / 2
 ballY = HEIGHT / 2
-
 directionX = 1
 directionY = 1
-
 player1_y = HEIGHT / 2
 player2_y = HEIGHT / 2
 player1_x = 1
@@ -113,7 +112,6 @@ keyboard.Listener(
 
 
 while True:
-
 	ballX += BALL_DIR_X * directionX
 	ballY += BALL_DIR_Y * directionY
 
@@ -136,7 +134,7 @@ while True:
 	if round(ballY) == HEIGHT - 1:
 		directionY = -1
 
-	conn.send(str.encode(f'{int(round(ballX))},{int(round(ballY))},{int(player1_y)}, {int(player2_y)}'))
+	conn.send(str.encode(f'{int(player1_y)},{int(player2_y)},{int(ballX)}, {int(ballY)}'))
 
 	os.system('cls')
 	draw(WIDTH, HEIGHT, LENGTH, player1_x, player1_y, player2_x, player2_y, ballX, ballY)
